@@ -1,17 +1,18 @@
-// src-sw.js
-
-const { offlineFallback, warmStrategyCache } = require('workbox-recipes');
-const { CacheFirst } = require('workbox-strategies');
+const { precacheAndRoute } = require('workbox-precaching');
+const { CacheFirst, NetworkFirst } = require('workbox-strategies');
 const { registerRoute } = require('workbox-routing');
 const { CacheableResponsePlugin } = require('workbox-cacheable-response');
 const { ExpirationPlugin } = require('workbox-expiration');
-const { precacheAndRoute } = require('workbox-precaching/precacheAndRoute');
+const { setConfig } = require('workbox-core');
+
+// Enable logging in the service worker
+setConfig({ debug: true });
 
 // Precache and route all static assets defined in the manifest
 precacheAndRoute(self.__WB_MANIFEST);
 
 // Define a cache for pages
-const pageCache = new CacheFirst({
+const pageCache = new NetworkFirst({
   cacheName: 'page-cache',
   plugins: [
     new CacheableResponsePlugin({
@@ -23,14 +24,18 @@ const pageCache = new CacheFirst({
   ],
 });
 
-// Warm the cache for specific URLs
-warmStrategyCache({
-  urls: ['/index.html', '/'],
-  strategy: pageCache,
-});
-
 // Register a route for navigation requests
-registerRoute(({ request }) => request.mode === 'navigate', pageCache);
+registerRoute(({ request }) => request.mode === 'navigate', async () => {
+  try {
+    const cachedResponse = await pageCache.handle({ request });
+    if (cachedResponse) {
+      return cachedResponse;
+    }
+    return await fetch(request);
+  } catch (error) {
+    return caches.match('/index.html');
+  }
+});
 
 // Implement asset caching
 registerRoute(

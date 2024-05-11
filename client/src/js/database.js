@@ -1,6 +1,4 @@
-// database.js
-
-import { openDB } from 'idb';
+const { openDB } = require('idb');
 
 const initdb = async () =>
   openDB('jate', 1, {
@@ -14,9 +12,8 @@ const initdb = async () =>
     },
   });
 
-// TODO: Add logic to a method that accepts some content and adds it to the database
 // Method to add content to the database
-export const putDb = async (content) => {
+const putDb = async (content) => {
   console.log('Adding content to the database:', content);
   const db = await openDB('jate', 1);
   const tx = db.transaction('jate', 'readwrite');
@@ -26,9 +23,8 @@ export const putDb = async (content) => {
   console.log('Content added successfully.');
 };
 
-// TODO: Add logic for a method that gets all the content from the database
 // Method to get all content from the database
-export const getDb = async () => {
+const getDb = async () => {
   console.log('Fetching all content from the database');
   const db = await openDB('jate', 1);
   const tx = db.transaction('jate', 'readonly');
@@ -39,3 +35,5 @@ export const getDb = async () => {
 };
 
 initdb();
+
+module.exports = { putDb, getDb };

@@ -1,10 +1,7 @@
-// editor.js
+const { getDb, putDb } = require('./database');
+const { header } = require('./header');
 
-// Import methods to save and get data from the indexedDB database in './database.js'
-import { getDb, putDb } from './database';
-import { header } from './header';
-
-export default class {
+class Editor {
   constructor() {
     const localData = localStorage.getItem('content');
 
@@ -42,3 +39,5 @@ export default class {
     });
   }
 }
+
+module.exports = Editor;
